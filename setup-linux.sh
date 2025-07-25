@@ -9,7 +9,7 @@ install_neovim_latest() {
 setup_debian() {
     if [ "$VERSION_ID" -eq "13" ]; then VERSION_ID="Unstable"; fi
     apt update
-    apt install sudo curl gpg git unzip -y
+    apt install sudo curl gpg unzip -y
     echo -e "\033[36m Installing fish shell \033[0m"
     sleep 2
     echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_$VERSION_ID/ /" | sudo tee /etc/apt/sources.list.d/shells:fish:release:4.list
@@ -22,7 +22,7 @@ setup_debian() {
 
 setup_ubuntu() {
     apt update
-    apt install sudo curl git unzip -y
+    apt install sudo curl unzip -y
     echo "Installing fish shell"
     sleep 2
     sudo add-apt-repository ppa:fish-shell/release-4
@@ -34,7 +34,7 @@ setup_ubuntu() {
 
 setup_dnf_distros() {
         dnf update
-        dnf install --skip-broken sudo curl gpg git unzip -y
+        dnf install --skip-broken sudo curl gpg unzip -y
         sudo dnf install fish neovim -y
 }
 
@@ -54,7 +54,7 @@ case $ID in
     ;;
 
     arch)
-        pacman -Sy --needed --noconfirm sudo curl fish neovim git
+        pacman -Sy --needed --noconfirm sudo curl fish neovim
     ;;
 
     *) echo "This is an unknown distribution."
