@@ -32,6 +32,12 @@ setup_ubuntu() {
     echo "Ubuntu initiation completed"
 }
 
+setup_dnf_distros() {
+        dnf update
+        dnf install --skip-broken sudo curl gpg git unzip -y
+        sudo dnf install fish neovim -y
+}
+
 . /etc/os-release
 
 case $ID in
@@ -44,15 +50,14 @@ case $ID in
     ;;
 
     fedora)
-        dnf update
-        dnf install sudo curl gpg git unzip -y
-        sudo dnf install fish neovim -y
+        setup_dnf_distros
     ;;
 
     arch)
-        pacman -S --needed sudo curl fish neovim git
+        pacman -Sy --needed --noconfirm sudo curl fish neovim git
     ;;
 
     *) echo "This is an unknown distribution."
     ;;
+    
     esac
