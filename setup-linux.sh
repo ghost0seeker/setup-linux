@@ -9,7 +9,7 @@ install_neovim_latest() {
 setup_debian() {
     if [ "$VERSION_ID" -eq "13" ]; then VERSION_ID="Unstable"; fi
     apt update
-    apt install sudo curl gpg -y
+    apt install sudo gpg -y
     echo -e "\033[36mInstalling fish shell.....\033[0m"
     sleep 2
     echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_$VERSION_ID/ /" | sudo tee /etc/apt/sources.list.d/shells:fish:release:4.list
@@ -22,7 +22,7 @@ setup_debian() {
 
 setup_ubuntu() {
     apt update
-    apt install sudo curl -y
+    apt install sudo -y
     echo -e "\033[36mInstalling fish shell.....\033[0m"
     sleep 2
     sudo add-apt-repository ppa:fish-shell/release-4
@@ -65,7 +65,7 @@ setup_user() {
 
 setup_dnf_distros() {
         dnf update
-        dnf install --skip-broken sudo curl gpg unzip -y
+        dnf install --skip-broken sudo gpg unzip -y
         sudo dnf install fish neovim -y
 }
 
@@ -85,7 +85,7 @@ case $ID in
     ;;
 
     arch)
-        pacman -Sy --needed --noconfirm sudo curl fish neovim
+        pacman -Sy --needed --noconfirm sudo fish neovim
     ;;
 
     *) echo "This is an unknown distribution."
@@ -98,13 +98,11 @@ read choice
 case $choice in
     y|Y|yes|YES)
         setup_user
-        ;;
-    n|N|no|NO)
-        echo "Skipped..."
-        ;;
-    *)
-        echo "Invalid input"
-        ;;
+    ;;
+    n|N|no|NO) echo "Skipped..."
+    ;;
+    *) echo "Invalid input"
+    ;;
 esac
 
 echo -e "\033[33mSetup Docker? (y/n).....\033[0m" 
@@ -112,11 +110,9 @@ read choice
 case $choice in
     y|Y|yes|YES)
         setup_docker
-        ;;
-    n|N|no|NO)
-        echo "Skipped..."
-        ;;
-    *)
-        echo "Invalid input"
-        ;;
+    ;;
+    n|N|no|NO) echo "Skipped..."
+    ;;
+    *) echo "Invalid input"
+    ;;
 esac
