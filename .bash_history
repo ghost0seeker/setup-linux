@@ -103,3 +103,12 @@ apt install sudo
 apt update
 apt install sudo
 exit
+exit
+cd /root
+ls -la
+chmod +x quick-setup.sh 
+./quick-setup.sh 
+exec fish
+cd /root
+./stackscript.sh 
+exit
