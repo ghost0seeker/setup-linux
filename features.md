@@ -3,3 +3,4 @@
         - [ ] starship
         - [ ] oh-my-posh
     - [ ] Setup fisher and envs
+- Setup User must be first thing that is done
