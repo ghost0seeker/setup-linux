@@ -1,0 +1,5 @@
+- [ ] Installing Fish
+    - [ ] Choose prompt
+        - [ ] starship
+        - [ ] oh-my-posh
+    - [ ] Setup fisher and envs

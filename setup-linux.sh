@@ -1,7 +1,7 @@
 #!/bin/bash
 
 install_neovim_latest() {
-    echo -e "\033[36mInstalling neovim.....\033[0m"
+    echo -e "\033[36mInstalling Neovim .....\033[0m"
     . /etc/os-release
 
     case $ID in
@@ -11,7 +11,7 @@ install_neovim_latest() {
         echo Checking for $REQUIRED_PKG: $PKG_OK
         if [ "" = "$PKG_OK" ]; then
             echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
-            apt install $REQUIRED_PKG -y
+            apt-get install $REQUIRED_PKG -y
         fi
         curl -f https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | sudo tar -xzvf - --strip-components=1 --overwrite -C /usr
         ;;
@@ -21,7 +21,7 @@ install_neovim_latest() {
         ;;
 
         arch)
-            pacman -S --noconfirm --needed neovim
+            pacman -Sy --noconfirm --needed neovim
         ;;
 
         *) echo "This is an unknown distribution."
@@ -33,30 +33,33 @@ install_neovim_latest() {
 install_fish_latest() {
     . /etc/os-release
 
+    echo -e "\033[36mInstalling Fish 󰈺.....\033[0m"
     case $ID in
         debian)
             echo -e "\033[36mDebian \033[0m"
-            REQUIRED_PKG="wget"
+            REQUIRED_PKG="wget curl gpg" # This breaks if any pkg is present
             PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
             echo Checking for $REQUIRED_PKG: $PKG_OK
             if [ "" = "$PKG_OK" ]; then
                 echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."
-                apt update
-                apt install $REQUIRED_PKG -y
+                apt-get update
+                apt-get install $REQUIRED_PKG -y
             fi
-            if [ "$VERSION_ID" -eq "13" ]; then VERSION_ID="Unstable"; fi
-            wget -qO fish.deb "https://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_$VERSION_ID/amd64/fish_4.0.2-2_amd64.deb"
-            apt install $(pwd)/fish.deb -y
-            rm -f fish.deb
+            if [ -z "$VERSION_ID" ]; then VERSION_ID="Unstable"; fi
+            echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_$VERSION_ID/ /" | tee /etc/apt/sources.list.d/shells:fish:release:4.list
+            curl -fsSL https://download.opensuse.org/repositories/shells:fish:release:4/Debian_"$VERSION_ID"/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/shells_fish_release_4.gpg > /dev/null
+            apt-get update
+            apt-get install fish -y
+            # rm -f fish.deb
         ;;
 
         ubuntu)
             echo -e "\033[36mUbuntu \033[0m"
-            apt update
+            apt-get update
             echo -e "\033[36mInstalling fish shell.....\033[0m"
             add-apt-repository ppa:fish-shell/release-4
-            apt update
-            apt install fish -y
+            apt-get update
+            apt-get install fish -y
         ;;
         fedora)
             echo -e "\033[36mFedora \033[0m"
@@ -65,16 +68,19 @@ install_fish_latest() {
 
         arch)
             echo -e "\033[36mArch 󰣇\033[0m"
-            pacman -S --noconfirm --needed fish
+            pacman -Sy --noconfirm --needed fish
         ;;
 
         *) echo " This is an unknown distribution ."
         ;;
     esac
 
+
+
 }
 
 setup_docker() {
+    echo -e "\033[36mInstalling Docker .....\033[0m"
     curl -fsSL https://get.docker.com | sh
     if [[ -n $USERNAME ]]; then 
         usermod -aG docker $USERNAME
@@ -85,21 +91,20 @@ setup_docker() {
 
 setup_user() {
 
-    echo "Setting User..."
-    
+    echo "Setting User ..."
   
     . /etc/os-release
 
     case $ID in
         debian|ubuntu)
-            echo -e "\033[36mDebian |Ubuntu \033[0m"
+            echo -e "\033[36mDebian  | Ubuntu \033[0m"
             REQUIRED_PKG="sudo"
             PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
             echo Checking for $REQUIRED_PKG: $PKG_OK
             if [ "" = "$PKG_OK" ]; then
                 echo "No $REQUIRED_PKG. Setting up $REQUIRED_PKG."  
-                apt update
-                apt install $REQUIRED_PKG -y
+                apt-get update
+                apt-get install $REQUIRED_PKG -y
             fi
         ;;
         fedora)
@@ -109,16 +114,21 @@ setup_user() {
 
         arch)
             echo -e "\033[36mArch 󰣇\033[0m"
-            pacman -S --noconfirm --needed sudo
+            pacman -Sy --noconfirm --needed sudo
         ;;
 
         *) echo " This is an unknown distribution ."
+            return 2
         ;;
     esac
 
     echo "Enter Username"
-    read USERNAME
+    read -r USERNAME
     if [[ -z "$USERNAME" ]]; then echo "\033[31mUSERNAME not set.....\033[0m"; return; fi
+    home_dir="/home/$USERNAME"
+    home_config="$home_dir/.config"
+    fish_config_dir="$home_config/fish"
+
     sugroup=$(getent group | grep -E "(wheel|sudo)" | head -n1 | cut -d: -f1)
     case $sugroup in
         sudo)
@@ -129,18 +139,24 @@ setup_user() {
             ;;
         *)
             echo "sudo is not ready"
+            return 2
             ;;
     esac
     if [[ -d /root/.ssh ]]; then 
         cp -r /root/.ssh /home/$USERNAME/.ssh
         chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
     fi
-    echo -e "\033[36mUser Created. Ssh keys copied. Excecute passwd $USERNAME to setup password\033[0m"
+    curl -sS https://starship.rs/install.sh | sh -s -- --yes
+    mkdir -p "$fish_config_dir"
+    cp /root/config.fish "$fish_config_dir"/config.fish
+    chown -R "$USERNAME":"$USERNAME" "/home/$USERNAME/"
+    starship preset jetpack -o /home/"$USERNAME"/.config/starship.toml
+    echo -e "\033[36mUser Created. SSH keys copied. Excecute passwd $USERNAME to setup password\033[0m"
 }
 
 setup_wrapper() {
 
-    echo -e "\033[33mInstall fish (y/n)?\033[0m"
+    echo -e "\033[33mInstall fish 󰈺 ? (y/n)?\033[0m"
     read choice
     case $choice in 
         y|Y|yes|YES)
@@ -153,7 +169,7 @@ setup_wrapper() {
             ;;
     esac
 
-   echo -e "\033[33mInstall neovim (y/n)?\033[0m"
+   echo -e "\033[33mInstall neovim  ? (y/n)?\033[0m"
     read choice
     case $choice in 
         y|Y|yes|YES)
@@ -166,7 +182,7 @@ setup_wrapper() {
             ;;
     esac
 
-    echo -e "\033[33mSetup User? (y/n).....\033[0m" 
+    echo -e "\033[33mSetup User  ? (y/n).....\033[0m" 
     read choice
     case $choice in
         y|Y|yes|YES)
@@ -178,7 +194,7 @@ setup_wrapper() {
         ;;
     esac
 
-    echo -e "\033[33mSetup Docker? (y/n).....\033[0m" 
+    echo -e "\033[33mSetup Docker ? (y/n).....\033[0m" 
     read choice
     case $choice in
         y|Y|yes|YES)
@@ -194,12 +210,21 @@ setup_wrapper() {
 main() {
 
     echo "Check root..."
-    if [[ $UID -ne 0 ]]; then
-        echo "Error: This script must be run as root" >&2
+    if [ "$EUID" -ne 0 ]; then
+        echo "Error: please run with sudo"
         exit 1
-    fi 
+    fi
+
+    if [ -n "$SUDO_USER" ]; then
+        echo "Sudo'd by: $SUDO_USER"
+        else
+        echo "Running as root directly"
+    fi
+
     echo "Running as root "
+ 
     setup_wrapper
+ 
     echo -e "\033[32mCompleted\033[0m"
 }
 
