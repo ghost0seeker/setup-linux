@@ -5,3 +5,6 @@ fish_plugins
 fish_variables
 conf.d
 docker_home
+.venv
+*cache*
+.env

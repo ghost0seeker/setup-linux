@@ -1,0 +1,50 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "unittest",
+            "args": [
+                "${input:testTypePrompt}"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Setup Linux",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "setup.py",
+            "args": [
+                "--apps",
+                "fish",
+                "kitty",
+                "nvim",
+                "docker",
+                "--user",
+                "powder"
+            ],
+            "console": "integratedTerminal"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "testTypePrompt",
+            "type": "promptString",
+            "description": "Discover or specific test:",
+            "default": "default.txt"
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+{
+    "terminal.integrated.defaultProfile.linux": "fish",
+"python.defaultInterpreterPath": "/home/coder/setup-linux/.venv/bin/python"
+}
