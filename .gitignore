@@ -8,3 +8,4 @@ docker_home
 .venv
 *cache*
 .env
+src_for_docker
